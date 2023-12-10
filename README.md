@@ -13,3 +13,5 @@ Windows: ' .\a.exe'
 Game description:
 
 So, in "Cosmic Escape," you've got 3 characters to choose from. Pick one, set the difficulty, and hit play. Now, use the up, down, left, and right keys to move around. Quick tip: go more left and right – it's speedier. Your goal? Cruise through 5 planets to win. But watch out for random aliens and asteroids—they're trouble. Oh, and there are two power-ups: Bolt which zaps threats in its way , and Nuke? Boom, it clears the Current screen from threats. Ready for some space action? Let's roll!
+
+all neccassary commenting has been made , the variable names are quite self explanatory
