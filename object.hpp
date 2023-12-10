@@ -117,8 +117,5 @@ class proimage : public GameObject {
 public:
     proimage(SDL_Renderer* renderer, const char* imagePath, int x, int y, int width, int height);
 };
-class Tick : public GameObject {
-public:
-    Tick(SDL_Renderer* renderer, const char* imagePath, int x, int y, int width, int height);
-};
+
 #endif // GAMEOBJECT_HPP

@@ -2,15 +2,13 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <iostream>
-
+// using these classes to draw the characters
 class Character {
 public:
     Character(SDL_Renderer* renderer, const char* imagePath, int x, int y, int width, int height);
     ~Character();
     void draw();
-    void update(int selected_level); // New method for updating position
-    void updatep();
-    void updatel();
+   
     void destroy(); //to destroy
     void handlekeypress(SDL_Rect& characterrect, const SDL_Event& event);
     SDL_Rect objectRect;
@@ -44,16 +42,7 @@ void Character:: destroy(){
         delete this;
     }
 }
-void Character::update(int selected_level) {
-    // Update the object's position (e.g., move it downwards)
-    objectRect.y += selected_level; // Adjust the value according to your needs
-}
-void Character :: updatep(){
-    objectRect.y+=1;
-}
-void Character :: updatel(){
-    objectRect.x-=15;
-}
+
 void Character::draw() {
     SDL_RenderCopy(objectRenderer, objectTexture, NULL, &objectRect);
     

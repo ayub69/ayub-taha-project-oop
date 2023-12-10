@@ -10,9 +10,7 @@ public:
     Character(SDL_Renderer* renderer, const char* imagePath, int x, int y, int width, int height);
     ~Character();
     void draw();
-    void update(int selected_level);
-    void updatep();
-    void updatel();
+    
     void destroy();
     void handlekeypress(SDL_Rect& characterrect, const SDL_Event& event);
     SDL_Rect objectRect;

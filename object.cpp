@@ -2,15 +2,15 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <iostream>
-
+// classes created here for objects that will be drawn on screen using polymorphism and inheritance
 class GameObject {
 public:
     GameObject(SDL_Renderer* renderer, const char* imagePath, int x, int y, int width, int height);
     ~GameObject();
     void draw();
-    void update(int selected_level); // New method for updating position
-    void updatep();
-    void updatel();
+    void update(int selected_level); //  method for updating position of alien and asteroid according to level
+    void updatep(); //to update planet and powerups
+    void updatel();// to update lighnting
     void destroy(); //to destroy
   
     SDL_Rect objectRect;
@@ -226,13 +226,6 @@ public:
 proimage::proimage(SDL_Renderer* renderer, const char* imagePath, int x, int y, int width, int height)
     : GameObject(renderer, imagePath, x, y, width, height) {
 }
-class Tick : public GameObject {
-public:
-    Tick(SDL_Renderer* renderer, const char* imagePath, int x, int y, int width, int height);
-};
 
-Tick::Tick(SDL_Renderer* renderer, const char* imagePath, int x, int y, int width, int height)
-    : GameObject(renderer, imagePath, x, y, width, height) {
-}
 
 

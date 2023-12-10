@@ -44,7 +44,7 @@ int main() {
             printf("Failed to load media!\n");
             return 1;
         }
-    Mix_PlayMusic(bgMusic, -1);  // -1 plays the music in an infinite loop
+    Mix_PlayMusic(bgMusic, -1);  
 
 
    
@@ -75,7 +75,7 @@ int main() {
     SDL_Rect playButtonRect = {77, 500, 120, 40};
 
 
-    // Button "Quit"s
+    // Button "Quit"
     SDL_Rect quitButtonRect = {281, 496, 110, 40};
   
     char selected_character;
@@ -91,7 +91,7 @@ int main() {
                     quit = true;
                     break;
                 case SDL_MOUSEBUTTONDOWN:
-               // std::cout<<event.button.x<<" "<<event.button.y<<'\n';
+           
                     if (event.button.button == SDL_BUTTON_LEFT) {
                         int mouseX = event.button.x;
                         int mouseY = event.button.y;
@@ -183,19 +183,3 @@ int main() {
 
 }
 
-
-//    Mix_FreeMusic(bgMusic);  // Free music 
-    // Mix_FreeMusic(bgMusic2);  // Free music 
-
-
-// // // Check if "Play" button is clicked
-//                         if (mouseX >= playButtonRect.x && mouseX <= playButtonRect.x + playButtonRect.w &&
-//                             mouseY >= playButtonRect.y && mouseY <= playButtonRect.y + playButtonRect.h) {
-//                             // Stop the first music
-//                             Mix_HaltMusic();
-//                             SDL_Delay(100);
-
-//                             //play second music
-//                             Mix_PlayMusic(bgMusic2, -1);  // -1 plays the music in an infinite loop
-//                             SDL_DestroyWindow(window);
-//                             quit = true;
