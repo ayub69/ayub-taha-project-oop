@@ -1,42 +1,82 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
+
 #include <iostream>
 #include "game.hpp"
-
+#include "object.hpp"
 
 /// 
 
-int main() {
-   
+Mix_Music* bgMusic = nullptr;
+Mix_Music* bgMusic2 = nullptr;
 
+bool loadMedia() {
+    bgMusic = Mix_LoadMUS("intromusic.wav");
+    if (bgMusic == NULL) {
+        printf("Unable to load music: %s\n", Mix_GetError());
+        return false;
+    }
+
+    bgMusic2 = Mix_LoadMUS("intromusic2.wav");
+    if (bgMusic2 == NULL) {
+        printf("Unable to load second music: %s\n", Mix_GetError());
+        return false;
+    }
+
+    return true;
+}
+
+
+int main() {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
+        printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+        return 1;
+    }
+    
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+        printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
+        return 1;
+    }
+
+    // Load media, including background music
+        if (!loadMedia()) {
+            printf("Failed to load media!\n");
+            return 1;
+        }
+    Mix_PlayMusic(bgMusic, -1);  // -1 plays the music in an infinite loop
+
+
+   
     SDL_Window *window = SDL_CreateWindow("Cosmic Escape", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_SHOWN);
     
 
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     
 
-    SDL_Surface *backgroundSurface = IMG_Load("backgroundscreen.jpeg");
+    SDL_Surface *backgroundSurface = IMG_Load("bg.png");
    
     SDL_Texture *backgroundTexture = SDL_CreateTextureFromSurface(renderer, backgroundSurface);
     SDL_FreeSurface(backgroundSurface);
-
-// buttons for levels 
-    SDL_Rect noobbutton = {100, 220, 125, 50};
-    SDL_Rect amaturebutton ={280, 220, 150, 50};
-    SDL_Rect probutton = {500, 220, 125, 50};
     
-
+// buttons for levels 
+    SDL_Rect noobbutton = {84, 378, 96, 30};
+    
+    SDL_Rect amaturebutton ={220, 379, 159, 30};
+    SDL_Rect probutton = {415, 379, 62, 25};
+    
+   
 // buttons for characters
-    SDL_Rect spaceshipButton = {100, 370, 150, 50};
-    SDL_Rect jetButton = {320, 370, 125, 50};
-    SDL_Rect rocketButton = {520, 370, 150, 50};
+    SDL_Rect spaceshipButton = {232, 133, 82, 80};
+    SDL_Rect jetButton = {349, 128, 90, 60};
+    SDL_Rect rocketButton = {143, 130, 46, 87};
     // Button "Play"
 
-    SDL_Rect playButtonRect = {100, 500, 100, 50};
+    SDL_Rect playButtonRect = {77, 500, 120, 40};
 
 
     // Button "Quit"s
-    SDL_Rect quitButtonRect = {300, 500, 100, 50};
+    SDL_Rect quitButtonRect = {281, 496, 110, 40};
   
     char selected_character;
     int selected_level;
@@ -51,6 +91,7 @@ int main() {
                     quit = true;
                     break;
                 case SDL_MOUSEBUTTONDOWN:
+               // std::cout<<event.button.x<<" "<<event.button.y<<'\n';
                     if (event.button.button == SDL_BUTTON_LEFT) {
                         int mouseX = event.button.x;
                         int mouseY = event.button.y;
@@ -91,16 +132,33 @@ int main() {
                             quit = true;
                         }
 
-                        // Check if "Play" button is clicked
+                       // Check if "Play" button is clicked
                         if (mouseX >= playButtonRect.x && mouseX <= playButtonRect.x + playButtonRect.w &&
                             mouseY >= playButtonRect.y && mouseY <= playButtonRect.y + playButtonRect.h) {
+                            // Stop the first music
+                            Mix_HaltMusic();
+                            SDL_Delay(100);
+
+                            // Play second music
+                            Mix_PlayMusic(bgMusic2, -1);  // -1 plays the music in an infinite loop
+
+                            // Destroy the window and exit the program
+                            SDL_DestroyWindow(window);
                             quit = true;
+
+                            if (selected_character and selected_level){
                             Game g;
                             g.runGame(selected_character,selected_level);
+                            }
                             // call class game
                            // std::system("clang++ game.cpp -o game.out -lSDL2 -lSDL2_image && ./game.out");
                         }
                     }
+                    break;
+                    case SDL_WINDOWEVENT:
+                    if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
+                        quit = true;
+                }
                     break;
             }
         }
@@ -117,6 +175,27 @@ int main() {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+    Mix_FreeMusic(bgMusic);
+    Mix_FreeMusic(bgMusic2);
 
     return 0;
+    // Mix_Quit();
+
 }
+
+
+//    Mix_FreeMusic(bgMusic);  // Free music 
+    // Mix_FreeMusic(bgMusic2);  // Free music 
+
+
+// // // Check if "Play" button is clicked
+//                         if (mouseX >= playButtonRect.x && mouseX <= playButtonRect.x + playButtonRect.w &&
+//                             mouseY >= playButtonRect.y && mouseY <= playButtonRect.y + playButtonRect.h) {
+//                             // Stop the first music
+//                             Mix_HaltMusic();
+//                             SDL_Delay(100);
+
+//                             //play second music
+//                             Mix_PlayMusic(bgMusic2, -1);  // -1 plays the music in an infinite loop
+//                             SDL_DestroyWindow(window);
+//                             quit = true;

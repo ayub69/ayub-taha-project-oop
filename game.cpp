@@ -1,10 +1,12 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <iostream>
+#include <SDL2/SDL_mixer.h>
 
 #include "object.hpp"
 #include <vector>
 #include "collision.hpp"
+#include "character.hpp"
 
 //#include "character.hpp"
 // character 
@@ -20,9 +22,10 @@ public:
     Game();
     ~Game();
     void runGame(char selected_character , int selected_level);
-    
+   
    // SDL_Surface* charactersurface=IMG_Load("jet.png");
-    SDL_Surface* charactersurface = IMG_Load("spaceship.png");
+    
+
 private:
    
     SDL_Renderer* renderer;
@@ -31,7 +34,8 @@ private:
     SDL_Rect characterrect;
 
     static void handleKeyPress1(SDL_Rect& characterrect, const SDL_Event& event);
-    
+    void playSoundEffect(const char *soundFilePath);
+    void playSoundEffectwin(const char *soundFilePath);
 };
 SDL_Window* window;
 
@@ -42,8 +46,8 @@ Game::Game() {
     SDL_Surface* backgroundSurface = IMG_Load("blackspace.jpeg");
     backgroundTexture = SDL_CreateTextureFromSurface(renderer, backgroundSurface);
     SDL_FreeSurface(backgroundSurface);
-    charactertexture = SDL_CreateTextureFromSurface(renderer, charactersurface);
-    SDL_FreeSurface(charactersurface);
+   // charactertexture = SDL_CreateTextureFromSurface(renderer, charactersurface);
+    //SDL_FreeSurface(charactersurface);
 
     characterrect.x = 375;
     characterrect.y = 500;
@@ -67,26 +71,32 @@ void Game::runGame(char selected_character, int selected_level) {
     bool pause=false;
     bool quit = false;
     SDL_Event event;
-    Alien *alien = new Alien(renderer, "alien.png", rand()%800, 0, 75, 75); 
+    Alien *alien = new Alien(renderer, "alien.png", rand()%800, -50, 75, 75); 
    //vector<GameObject> object_list;
-    Asteroid1 *asteroid = new Asteroid1(renderer, "meteor1.png", rand()%800, 0, 75, 75); 
-    Asteroid2 *asteroid2 = new Asteroid2(renderer, "meteor2.png", rand()%800, 0, 75, 75); 
-    Alien2 *alien2 = new Alien2(renderer, "alien2.png", rand()%800, 0, 75, 75); 
-    Planet planet(renderer, "planet1.png", 300, 0, 200, 200);
-    Planet2 planet2(renderer, "planet2.png", 500, 0, 300, 300);
-    Planet3 planet3(renderer, "planet3.png", 300, -100, 300, 300);
-    Planet4 planet4(renderer, "planet4.png", 500, 0, 300, 300);
-    Planet5 planet5(renderer, "planet5.png", 300, -100, 300, 300);
+    Asteroid1 *asteroid = new Asteroid1(renderer, "meteor1.png", rand()%800, -50, 75, 75); 
+    Asteroid2 *asteroid2 = new Asteroid2(renderer, "meteor2.png", rand()%800, -50, 75, 75); 
+    Alien2 *alien2 = new Alien2(renderer, "alien2.png", rand()%800, -50, 75, 75); 
+    Planet planet(renderer, "planet1.png", 400, -50, 150, 200);
+    Planet2 planet2(renderer, "planet2.png", 500, -50, 200, 200);
+    Planet3 planet3(renderer, "planet3.png", 300, -100, 200, 200);
+    Planet4 planet4(renderer, "planet4.png", 500, -50, 200, 200);
+    Planet5 planet5(renderer, "planet5.png", 300, -100, 200, 200);
     Sun sun(renderer, "sun.png", -200, -200, 500, 500);
     //Spaceship *character= new Spaceship(renderer, "spaceship.png", 375, 500, 50, 50);
-    won won1(renderer, "won.png",200,200,300,300);
+    won won1(renderer, "won.png",0,0,800,600);
+
+    lost lost1(renderer, "lost.png",0,0,800,600);
+     noobimage noob(renderer, "noob.png",300,0,200,100);
+     amateurimage amateur (renderer, "amateur.png",300,0,200,100);
+     proimage pro (renderer, "pro.png",300,0,200,100);
     Spaceship spaceship(renderer, character_img, 375, 500, 50, 50);
     Jet jet (renderer, "jet.png", 375, 500, 50, 50);
    Rocket rocket (renderer, "rocket.png", 375, 500, 50, 50);
    Powerup1 powerup1(renderer,  "powerup 1.png", 150, 0, 200, 200);
     Powerup2 *lightning=new Powerup2(renderer,  "lightning.png", 800, 200, 250, 250);
-   Powerup3 bolt(renderer,  "bolt.png", rand()%800, -100, 100, 100);
-    bool alien11, alien22, planet1, asteroid11, asteroid22,bolt1,lightning1;
+   Powerup3 bolt(renderer,  "bolt.png", rand()%800, -200, 100, 100);
+   Powerup4 kaboom(renderer,"powerup4.png",rand()%800,-200,100,100);
+    bool alien11, alien22, planet1, asteroid11, asteroid22,bolt1,lightning1,lost11,kaboom1,crashsound,powerupsound,powerupsound2,winsound;
     alien11 = false;
     alien22 = false;
     planet1 = false;
@@ -94,8 +104,18 @@ void Game::runGame(char selected_character, int selected_level) {
     asteroid22 = false;
     bolt1=true;
     lightning1=false;
+    lost11=false;
+    crashsound=false;
+    kaboom1=true;
+    winsound=false;
+
+    int winsoundcount=0;
+    int crashsoundcount=0;
+    int powerupsoundcount=0;
+    int powerupsoundcount2=0;
+    int lightningsoundcount=0;
     
-    static int framecount=60;
+    static int framecount=120;
     int frames=0;
     int lightcount=0;
     while (!quit) {
@@ -118,7 +138,28 @@ void Game::runGame(char selected_character, int selected_level) {
         }
 
         SDL_RenderClear(renderer);
-
+        if (winsound && winsoundcount==0){
+            playSoundEffectwin("winsound.wav");
+            winsoundcount++;
+            SDL_Delay(1500);
+            quit=true;
+        }
+        if (crashsound && crashsoundcount<1){
+            playSoundEffect("crashsound.wav");
+            crashsoundcount++;
+        }
+        if(powerupsound && powerupsoundcount==0){
+            powerupsoundcount++;
+            playSoundEffect("powerupsound.wav");
+        }
+        if(powerupsound2 && powerupsoundcount2==0){
+            powerupsoundcount2++;
+            playSoundEffect("kaboomsound.wav");
+        }
+        if (lightning1 && lightningsoundcount==0){
+            playSoundEffect("lightningsound.wav");
+            lightningsoundcount++;
+        }
         // Update background position (vertical wrap-around effect)
         static int backgroundOffsetY = 0;
         backgroundOffsetY = (backgroundOffsetY + 1) % 600; // Adjust based on your background size
@@ -130,16 +171,23 @@ void Game::runGame(char selected_character, int selected_level) {
         SDL_RenderCopy(renderer, backgroundTexture, NULL, &backgroundRect2);
         planet.draw();
         planet.updatep();
-       sun.draw();
-       
-         if (selected_character=='j'){
+        sun.draw();
+        if (selected_level==1){
+            noob.draw();
+            
+        } else if (selected_level==2){
+            amateur.draw();
+        } else if (selected_level==4){
+            pro.draw();
+        }
+        if (selected_character=='j'){
         jet.draw();
-        
-    } else if (selected_character=='r'){
+
+        } else if (selected_character=='r'){
         rocket.draw();
-    } else if (selected_character=='s'){
+        } else if (selected_character=='s'){
         spaceship.draw();
-    }
+        }
        if (pause==false){
         // Draw scaled-down character
         if (frames%framecount==0){
@@ -171,28 +219,43 @@ void Game::runGame(char selected_character, int selected_level) {
         if (lightning1 and lightcount<=2){
             lightning->draw();
                 lightning->updatel();
+                //playSoundEffect("lightningsound.wav");
                     if (Collision::checkCollision(lightning->objectRect, alien->objectRect)) {
                         alien11=false;
+                       
+                alien->destroy();
+                alien = new Alien (renderer, "alien.png", rand()%800, -100, 75, 75);
+                
+        
                     }
                      if (Collision::checkCollision(lightning->objectRect, alien2->objectRect)) {
-                        alien22=false;;
+                        alien22=false;
+                          alien2->destroy();
+                        alien2 = new Alien2 (renderer, "alien2.png", rand()%800, -100, 75, 75);
                     }
                     if (Collision::checkCollision(lightning->objectRect, asteroid->objectRect)) {
                        asteroid11=false;
+                        asteroid11=false;
+                        asteroid->destroy();
+                        asteroid= new Asteroid1(renderer,"asteroid1.png",rand()%800, -100, 75, 75);
                     }
                     if (Collision::checkCollision(lightning->objectRect, asteroid2->objectRect)) {
                         asteroid22=false;
+                        asteroid2->destroy();
+                        asteroid2= new Asteroid2(renderer, "meteor2.png", rand()%800, -100, 75, 75);
                     }
+            
         }
-        
-       
-
-        if(planet.objectRect.y>=600){
+        if(planet.objectRect.y>=500){
                 //std::cout<<"works";
                
                 //planet.destroy();
                 planet2.draw();
                 planet2.updatep();
+                //  if (kaboom1){
+                // kaboom.draw();
+                // kaboom.updatep();
+                // }
             }
         if (planet2.objectRect.y>=600){
             planet3.draw();
@@ -208,6 +271,10 @@ void Game::runGame(char selected_character, int selected_level) {
             planet4.draw();
             
                 planet4.updatep();
+                if (kaboom1){
+                kaboom.draw();
+                kaboom.updatep();
+                }
         }
         if (planet4.objectRect.y>=600){
            // std::cout<<"planet5";
@@ -226,7 +293,7 @@ void Game::runGame(char selected_character, int selected_level) {
                 //std::cout<<"works";
                 alien11=false;
                 alien->destroy();
-                alien = new Alien (renderer, "alien.png", rand()%800, 0, 75, 75);
+                alien = new Alien (renderer, "alien.png", rand()%800, -100, 75, 75);
             }
 
         }
@@ -237,7 +304,7 @@ void Game::runGame(char selected_character, int selected_level) {
                 //std::cout<<"works";
                 alien22=false;
                 alien2->destroy();
-                alien2 = new Alien2 (renderer, "alien2.png", rand()%800, 0, 75, 75);
+                alien2 = new Alien2 (renderer, "alien2.png", rand()%800,-100, 75, 75);
             }
         }
         if (asteroid11){
@@ -246,7 +313,7 @@ void Game::runGame(char selected_character, int selected_level) {
             if (asteroid -> objectRect.y>=600){
                 asteroid11=false;
                 asteroid->destroy();
-                asteroid = new Asteroid1(renderer, "meteor1.png", rand()%800, 0, 75, 75);
+                asteroid = new Asteroid1(renderer, "meteor1.png", rand()%800, -100, 75, 75);
             }
         }
         if(asteroid22){
@@ -256,81 +323,247 @@ void Game::runGame(char selected_character, int selected_level) {
             if (asteroid2 -> objectRect.y>=600){
                 asteroid22=false;
                 asteroid2->destroy();
-                asteroid2= new Asteroid2(renderer, "meteor2.png", rand()%800, 0, 75, 75);
+                asteroid2= new Asteroid2(renderer, "meteor2.png", rand()%800, -100, 75, 75);
         }
         }
-        // for (auto & e: object_list)
-        // {
-        //     e.draw();
-        //     e.update();
-        // }
+       
         
        }
-       if (planet5.objectRect.y>=600){
+
+       if (planet5.objectRect.y>=500){
            // std::cout<<"planet5";
             won1.draw();
+            winsound=true;
             
-
         }
       // SDL_RenderCopy(renderer, charactertexture, NULL, &characterrect);
+      //collision checking
           if (selected_character=='j'){
             if (Collision::checkCollision(jet.objectRect, alien->objectRect)) {
                 pause=true;
+                lost11=true;
+                crashsound=true;
             }
             if (Collision::checkCollision(jet.objectRect, alien2->objectRect)) {
                 pause=true;
+                lost11=true;
+                crashsound=true;
             }
             if (Collision::checkCollision(jet.objectRect, asteroid->objectRect)) {
                 pause=true;
+                lost11=true;
+                crashsound=true;
             }
             if (Collision::checkCollision(jet.objectRect, asteroid2->objectRect)) {
                 pause=true;
+                lost11=true;
+                crashsound=true;
+            }
+            if (Collision::checkCollision(jet.objectRect, planet.objectRect)) {
+                pause=true;
+                lost11=true;
+                crashsound=true;
+            }
+            if (Collision::checkCollision(jet.objectRect, planet2.objectRect)) {
+                pause=true;
+                lost11=true;
+                crashsound=true;
+            }
+            if (Collision::checkCollision(jet.objectRect, planet3.objectRect)) {
+                pause=true;
+                crashsound=true;
+                lost11=true;
+            }
+            if (Collision::checkCollision(jet.objectRect, planet4.objectRect)) {
+                pause=true;
+                lost11=true;
+                crashsound=true;
+            }
+             if (Collision::checkCollision(jet.objectRect, planet5.objectRect)) {
+                pause=true;
+                lost11=true;
+                crashsound=true;
             }
             if (Collision::checkCollision(jet.objectRect, bolt.objectRect)) {
                 bolt1=false;
                 lightning1=true;
+                powerupsound=true;
+            }
+            if (Collision::checkCollision(jet.objectRect, kaboom.objectRect)) {
+                kaboom1=false;
+                powerupsound2=true;
+                alien11=false;
+                alien22=false;
+                asteroid11=false;
+                asteroid22=false;
+                alien = new Alien (renderer, "alien.png", rand()%800, -100, 75, 75);
+                alien22=false;
+                alien2->destroy();
+                alien2 = new Alien2 (renderer, "alien2.png", rand()%800, -100, 75, 75);
+                asteroid11=false;
+                asteroid->destroy();
+                asteroid= new Asteroid1(renderer,"asteroid1.png",rand()%800, -100, 75, 75);
+                asteroid22=false;
+                asteroid2->destroy();
+                asteroid2= new Asteroid2(renderer, "meteor2.png", rand()%800, -100, 75, 75);
                 
             }
         
     } else if (selected_character=='r'){
         if (Collision::checkCollision(rocket.objectRect, alien->objectRect)) {
                 pause=true;
+                lost11=true;
+                crashsound=true;
+                
             }
             if (Collision::checkCollision(rocket.objectRect, alien2->objectRect)) {
                 pause=true;
+                lost11=true;
+                crashsound=true;
             }
             if (Collision::checkCollision(rocket.objectRect, asteroid->objectRect)) {
                 pause=true;
+                lost11=true;
+                crashsound=true;
             }
             if (Collision::checkCollision(rocket.objectRect, asteroid2->objectRect)) {
                 pause=true;
+                lost11=true;
+                crashsound=true;
             }
             if (Collision::checkCollision(rocket.objectRect, bolt.objectRect)) {
                 bolt1=false;
                 lightning1=true;
+                powerupsound=true;
+             
+                
+            }
+            if (Collision::checkCollision(rocket.objectRect, planet.objectRect)) {
+                pause=true;
+                lost11=true;
+                crashsound=true;
+                
+                
+                
+
+            }
+            if (Collision::checkCollision(rocket.objectRect, planet2.objectRect)) {
+                pause=true;
+                lost11=true;
+                crashsound=true;
+            }
+            if (Collision::checkCollision(rocket.objectRect, planet3.objectRect)) {
+                pause=true;
+                lost11=true;
+                crashsound=true;
+            }
+            if (Collision::checkCollision(rocket.objectRect, planet4.objectRect)) {
+                pause=true;
+                lost11=true;
+                crashsound=true;
+            }
+             if (Collision::checkCollision(rocket.objectRect, planet5.objectRect)) {
+                pause=true;
+                lost11=true;
+                crashsound=true;
+            }
+            if (Collision::checkCollision(rocket.objectRect, kaboom.objectRect)) {
+                kaboom1=false;
+                powerupsound2=true;
+                alien11=false;
+                alien22=false;
+               
+                 asteroid11=false;
+                
+                asteroid22=false;
+                alien = new Alien (renderer, "alien.png", rand()%800, -100, 75, 75);
+                alien22=false;
+                alien2->destroy();
+                alien2 = new Alien2 (renderer, "alien2.png", rand()%800, -100, 75, 75);
+                asteroid11=false;
+                asteroid->destroy();
+                asteroid= new Asteroid1(renderer,"asteroid1.png",rand()%800, -100, 75, 75);
+                asteroid22=false;
+                asteroid2->destroy();
+                asteroid2= new Asteroid2(renderer, "meteor2.png", rand()%800, -100, 75, 75);
                 
             }
     } else if (selected_character=='s'){
         if (Collision::checkCollision(spaceship.objectRect, alien->objectRect)) {
                 pause=true;
+                lost11=true;
+                crashsound=true;
             }
             if (Collision::checkCollision(spaceship.objectRect, alien2->objectRect)) {
                     pause=true;
+                    crashsound=true;
+                    lost11=true;
             }
             if (Collision::checkCollision(spaceship.objectRect, asteroid->objectRect)) {
                 pause=true;
+                crashsound=true;
+                lost11=true;
             }
             if (Collision::checkCollision(spaceship.objectRect, asteroid2->objectRect)) {
                 pause=true;
+                lost11=true;
+                crashsound=true;
             }
             if (Collision::checkCollision(spaceship.objectRect, bolt.objectRect)) {
                 bolt1=false;
                 lightning1=true;
+                powerupsound=true;
                 
             }
+            if (Collision::checkCollision(spaceship.objectRect, planet.objectRect)) {
+                pause=true;
+                lost11=true;
+                crashsound=true;
+            }
+            if (Collision::checkCollision(spaceship.objectRect, planet2.objectRect)) {
+                pause=true;
+                lost11=true;
+                crashsound=true;
+            }
+            if (Collision::checkCollision(spaceship.objectRect, planet3.objectRect)) {
+                pause=true;
+                lost11=true;
+                crashsound=true;
+            }
+            if (Collision::checkCollision(spaceship.objectRect, planet4.objectRect)) {
+                pause=true;
+                lost11=true;
+                crashsound=true;
+            }
+             if (Collision::checkCollision(spaceship.objectRect, planet5.objectRect)) {
+                pause=true;
+                crashsound=true;
+                lost11=true;
+            }
+            if (Collision::checkCollision(spaceship.objectRect, kaboom.objectRect)) {
+                kaboom1=false;
+                powerupsound2=true;
+                alien11=false;
+                alien->destroy();
+                alien = new Alien (renderer, "alien.png", rand()%800, -100, 75, 75);
+                alien22=false;
+                alien2->destroy();
+                alien2 = new Alien2 (renderer, "alien2.png", rand()%800, -100, 75, 75);
+                asteroid11=false;
+                asteroid->destroy();
+                asteroid= new Asteroid1(renderer,"asteroid1.png",rand()%800, -100, 75, 75);
+                asteroid22=false;
+                asteroid2->destroy();
+                asteroid2= new Asteroid2(renderer, "meteor2.png", rand()%800, -100, 75, 75);
+
+            }
+    }
+    if (lost11){
+        pause=true;
+        lost1.draw();
+      
     }
        SDL_RenderPresent(renderer);
-    
     }
     }
 void Game::handleKeyPress1(SDL_Rect& characterrect, const SDL_Event& event) {
@@ -355,8 +588,8 @@ void Game::handleKeyPress1(SDL_Rect& characterrect, const SDL_Event& event) {
 
     if (currentKeyStates[SDL_SCANCODE_UP]) {
         characterrect.y -= 3;
-        if (characterrect.y +characterrect.h < 0) {
-            characterrect.y = 0; // Keep character within the top edge of the screen
+        if (characterrect.y + characterrect.h< 0) {
+            characterrect.y = 0; // Keep character within the top of the screen
         }
     }
 
@@ -369,4 +602,35 @@ void Game::handleKeyPress1(SDL_Rect& characterrect, const SDL_Event& event) {
 }
 
 
+void Game::playSoundEffect(const char *soundFilePath)
+{
+    Mix_Chunk *sound = Mix_LoadWAV(soundFilePath);
+    if (sound == nullptr)
+    {
+        printf("Failed to load sound effect! SDL_mixer Error: %s\n", Mix_GetError());
+        return;
+    }
 
+    Mix_PlayChannel(-1, sound, 0);
+
+    // Optionally, wait for the sound effect to finish playing
+    SDL_Delay(150);
+
+    Mix_FreeChunk(sound);
+}
+void Game::playSoundEffectwin(const char *soundFilePath)
+{
+    Mix_Chunk *sound = Mix_LoadWAV(soundFilePath);
+    if (sound == nullptr)
+    {
+        printf("Failed to load sound effect! SDL_mixer Error: %s\n", Mix_GetError());
+        return;
+    }
+
+    Mix_PlayChannel(-1, sound, 0);
+
+    // Optionally, wait for the sound effect to finish playing
+    SDL_Delay(1500);
+
+    Mix_FreeChunk(sound);
+}

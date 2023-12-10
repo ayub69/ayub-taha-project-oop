@@ -14,5 +14,11 @@ public:
         );
     }
 };
+SDL_Rect operator+(const SDL_Rect& rect1, const SDL_Rect& rect2);
 
+// Overload '>' operator for SDL_Rect
+bool operator>(const SDL_Rect& rect1, const SDL_Rect& rect2);
+
+// Overload '<' operator for SDL_Rect
+bool operator<(const SDL_Rect& rect1, const SDL_Rect& rect2);
 #endif // COLLISION_HPP

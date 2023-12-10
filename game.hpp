@@ -14,8 +14,11 @@ public:
     Game();
     ~Game();
     void runGame(char selected_character, int selected_level);
+    
 SDL_Texture* charactertexture;
 private:
+    void playSoundEffect(const char *soundFilePath);
+    void playSoundEffectwin(const char *soundFilePath);
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Texture* backgroundTexture;
