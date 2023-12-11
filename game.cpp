@@ -176,7 +176,7 @@ void Game::runGame(char selected_character, int selected_level) {
         SDL_RenderCopy(renderer, backgroundTexture, NULL, &backgroundRect2);
 
         planet.draw();
-        planet.updatep();
+        planet.update();
         sun.draw();
         //drawing difficulty label according to what level is selected
         if (selected_level==1){
@@ -256,15 +256,15 @@ void Game::runGame(char selected_character, int selected_level) {
         } // drawing planet after a planet has escaped the screen and drawing the powerups accordibng to planet checkpoints
         if(planet.objectRect.y>=500){
                 planet2.draw();
-                planet2.updatep();
+                planet2.update();
                
             }
         if (planet2.objectRect.y>=600){
             planet3.draw();
-            planet3.updatep();
+            planet3.update();
                 if (bolt1){
                 bolt.draw();
-                bolt.updatep();
+                bolt.update();
                 }
         }
 
@@ -272,16 +272,16 @@ void Game::runGame(char selected_character, int selected_level) {
             //std::cout<<"planet4";
             planet4.draw();
             
-                planet4.updatep();
+                planet4.update();
                 if (kaboom1){
                 kaboom.draw();
-                kaboom.updatep();
+                kaboom.update();
                 }
         }
         if (planet4.objectRect.y>=600){
            // std::cout<<"planet5";
             planet5.draw();
-                planet5.updatep();
+                planet5.update();
         }if (planet5.objectRect.y>=500){
            // std::cout<<"planet5";
             won1.draw();

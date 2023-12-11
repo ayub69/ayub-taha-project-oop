@@ -11,7 +11,7 @@ public:
     ~GameObject();
     void draw();
     void update(int selected_level);
-    void updatep();
+    void update();
     void updatel();
     void destroy();
  

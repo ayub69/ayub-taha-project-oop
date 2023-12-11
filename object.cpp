@@ -9,7 +9,7 @@ public:
     ~GameObject();
     void draw();
     void update(int selected_level); //  method for updating position of alien and asteroid according to level
-    void updatep(); //to update planet and powerups
+    void update(); //to update planet and powerups
     void updatel();// to update lighnting
     void destroy(); //to destroy
   
@@ -48,7 +48,7 @@ void GameObject::update(int selected_level) {
     // Update the object's position (e.g., move it downwards)
     objectRect.y += selected_level; // Adjust the value according to your needs
 }
-void GameObject :: updatep(){
+void GameObject :: update(){
     objectRect.y+=1;
 }
 void GameObject :: updatel(){
