@@ -24,6 +24,9 @@ private:
     SDL_Texture* backgroundTexture;
    // SDL_Texture* charactertexture;
     SDL_Rect spaceshipRect;
+    static void handleKeyPress1(SDL_Rect& characterrect, const SDL_Event& event,char selected_character, int selected_level);
+    void playSoundEffect(const char *soundFilePath);
+    void playSoundEffectwin(const char *soundFilePath);
 
 
 };

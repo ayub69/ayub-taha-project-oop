@@ -33,7 +33,7 @@ private:
     SDL_Texture* charactertexture;
     SDL_Rect characterrect;
 
-    static void handleKeyPress1(SDL_Rect& characterrect, const SDL_Event& event);
+    static void handleKeyPress1(SDL_Rect& characterrect, const SDL_Event& event,char selected_character, int selected_level);
     void playSoundEffect(const char *soundFilePath);
     void playSoundEffectwin(const char *soundFilePath);
 };
@@ -132,11 +132,11 @@ void Game::runGame(char selected_character, int selected_level) {
             }
             //checking which character is selected and applying handle keys function to that only
              if (selected_character=='j'){
-        handleKeyPress1(jet.objectRect, event); 
+        handleKeyPress1(jet.objectRect, event, selected_character,  selected_level); 
     } else if (selected_character=='r'){
-        handleKeyPress1(rocket.objectRect, event); 
+        handleKeyPress1(rocket.objectRect, event,selected_character, selected_level); 
     } else if (selected_character=='s'){
-       handleKeyPress1(spaceship.objectRect, event); 
+       handleKeyPress1(spaceship.objectRect, event, selected_character,selected_level); 
     }
             // Handle key presses
         }
@@ -147,7 +147,15 @@ void Game::runGame(char selected_character, int selected_level) {
             playSoundEffectwin("winsound.wav");
             winsoundcount++;
             SDL_Delay(1500);
-            quit=true;
+            alien->destroy();
+            alien = new Alien (renderer, "alien.png", rand()%800, -100, 75, 75);
+            alien2->destroy();
+            alien2 = new Alien2 (renderer, "alien2.png", rand()%800, -100, 75, 75);
+            asteroid->destroy();
+            asteroid= new Asteroid1(renderer,"asteroid1.png",rand()%800, -100, 75, 75);       
+            asteroid2->destroy();
+            asteroid2= new Asteroid2(renderer, "meteor2.png", rand()%800, -100, 75, 75);
+            
         }
         if (crashsound && crashsoundcount<1){
             playSoundEffect("crashsound.wav");
@@ -571,12 +579,15 @@ void Game::runGame(char selected_character, int selected_level) {
     }
     }
     //function for movement
-void Game::handleKeyPress1(SDL_Rect& characterrect, const SDL_Event& event) {
+void Game::handleKeyPress1(SDL_Rect& characterrect, const SDL_Event& event, char selected_character, int selected_level) {
     const Uint8* currentKeyStates = SDL_GetKeyboardState(nullptr);
     int movementSpeed = 5;
     int screenWidth = 800;
     int screenHeight = 600;
-
+    if(currentKeyStates[SDL_SCANCODE_SPACE]){
+        Game x;
+        x.runGame( selected_character,  selected_level);
+    }
     if (currentKeyStates[SDL_SCANCODE_LEFT]) {
         characterrect.x -= 10;
         if (characterrect.x < 0) {
