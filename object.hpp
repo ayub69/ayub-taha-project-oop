@@ -98,6 +98,11 @@ public:
     Powerup4(SDL_Renderer* renderer, const char* imagePath, int x, int y, int width, int height);
 };
 
+class Coin : public GameObject {
+public:
+    Coin(SDL_Renderer* renderer, const char* imagePath, int x, int y, int width, int height);
+};
+
 class lost : public GameObject {
 public:
     lost(SDL_Renderer* renderer, const char* imagePath, int x, int y, int width, int height);

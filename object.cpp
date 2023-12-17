@@ -191,6 +191,15 @@ public:
 Powerup4::Powerup4(SDL_Renderer* renderer, const char* imagePath, int x, int y, int width, int height)
     : GameObject(renderer, imagePath, x, y, width, height) {
 }
+class Coin : public GameObject {
+public:
+    Coin(SDL_Renderer* renderer, const char* imagePath, int x, int y, int width, int height);
+};
+
+Coin::Coin(SDL_Renderer* renderer, const char* imagePath, int x, int y, int width, int height)
+    : GameObject(renderer, imagePath, x, y, width, height) {
+}
+
 //-------
 class lost : public GameObject {
 public:

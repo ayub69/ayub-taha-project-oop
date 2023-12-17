@@ -142,13 +142,15 @@ int main() {
                             // Play second music
                             Mix_PlayMusic(bgMusic2, -1);  // -1 plays the music in an infinite loop
 
-                            // Destroy the window and exit the program
-                            SDL_DestroyWindow(window);
-                            quit = true;
+                            // // Destroy the window and exit the program
+                            // SDL_DestroyWindow(window);
+                            // quit = true;
 
                             if (selected_character and selected_level){
-                            Game g;
-                            g.runGame(selected_character,selected_level);
+                            Game* g=new Game;
+                            g->runGame(selected_character,selected_level);
+                            SDL_DestroyWindow(window);
+                            quit = true;
                             }
                             // call class game
                            // std::system("clang++ game.cpp -o game.out -lSDL2 -lSDL2_image && ./game.out");

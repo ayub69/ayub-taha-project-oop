@@ -2,6 +2,7 @@
 #include <SDL2/SDL_image.h>
 #include <iostream>
 #include <SDL2/SDL_mixer.h>
+#include <SDL2_ttf/SDL_ttf.h>
 
 #include "object.hpp"
 #include <vector>
@@ -42,6 +43,16 @@ SDL_Window* window;
 Game::Game() { // default constructor
     window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_SHOWN);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        std::cerr << "SDL initialization failed: " << SDL_GetError() << std::endl;
+
+    }
+
+    if (TTF_Init() < 0) {
+        std::cerr << "TTF initialization failed: " << TTF_GetError() << std::endl;
+        SDL_Quit();
+
+    }
 
     SDL_Surface* backgroundSurface = IMG_Load("blackspace.jpeg");
     backgroundTexture = SDL_CreateTextureFromSurface(renderer, backgroundSurface);
@@ -65,7 +76,15 @@ Game::~Game() {
 }
 
 void Game::runGame(char selected_character, int selected_level) {
+    
+    
+    
+    // font intitiallizatiobn
+    const char* fontPath = "BebasNeue-Regular.ttf";
+    TTF_Font* font = TTF_OpenFont(fontPath, 24); // Replace with the path to your TrueType font file
+    SDL_Color textColor = {255, 255, 255}; // White color, you can change this
 
+    int score = 1;
     const char character_img[14]="spaceship.png";
     // creating pause and quit flags
     bool pause=false;
@@ -78,6 +97,7 @@ void Game::runGame(char selected_character, int selected_level) {
     Asteroid1 *asteroid = new Asteroid1(renderer, "meteor1.png", rand()%800, -50, 75, 75); 
     Asteroid2 *asteroid2 = new Asteroid2(renderer, "meteor2.png", rand()%800, -50, 75, 75); 
     Alien2 *alien2 = new Alien2(renderer, "alien2.png", rand()%800, -50, 75, 75); 
+    Coin *coin = new Coin(renderer, "coin.png", rand()%800, -50, 75, 75); 
     Planet planet(renderer, "planet1.png", 400, -50, 150, 200);
     Planet2 planet2(renderer, "planet2.png", 500, -50, 200, 200);
     Planet3 planet3(renderer, "planet3.png", 300, -100, 200, 200);
@@ -99,7 +119,7 @@ void Game::runGame(char selected_character, int selected_level) {
    Powerup3 bolt(renderer,  "bolt.png", rand()%800, -200, 100, 100);
    Powerup4 kaboom(renderer,"powerup4.png",rand()%800,-200,100,100);
    //creating all flags here which are used in the code for generation, sound etc.
-    bool alien11, alien22, planet1, asteroid11, asteroid22,bolt1,lightning1,lost11,kaboom1,crashsound,powerupsound,powerupsound2,winsound;
+    bool alien11, coin1,alien22, planet1, asteroid11, asteroid22,bolt1,lightning1,lost11,kaboom1,crashsound,powerupsound,powerupsound2,winsound;
     alien11 = false;
     alien22 = false;
     planet1 = false;
@@ -111,6 +131,7 @@ void Game::runGame(char selected_character, int selected_level) {
     crashsound=false;
     kaboom1=true;
     winsound=false;
+    coin1=false;
 
     int winsoundcount=0;
     int crashsoundcount=0;
@@ -121,18 +142,36 @@ void Game::runGame(char selected_character, int selected_level) {
     static int framecount=120;
     int frames=0;
     int lightcount=0;
+    int reset=0;
+
     while (!quit) {
         //character.draw();
+        SDL_RenderClear(renderer);
+
         frames+=selected_level;
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
                     quit = true;
                     break;
+            case SDL_WINDOWEVENT:
+                    if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
+                        quit = true;
+                        break;
+                }
             }
+                    
+     
             //checking which character is selected and applying handle keys function to that only
              if (selected_character=='j'){
         handleKeyPress1(jet.objectRect, event, selected_character,  selected_level); 
+        if(jet.objectRect.x==-1){
+            quit=true;
+            pause=true;
+            reset=1;
+        }
+        
+        
     } else if (selected_character=='r'){
         handleKeyPress1(rocket.objectRect, event,selected_character, selected_level); 
     } else if (selected_character=='s'){
@@ -140,8 +179,20 @@ void Game::runGame(char selected_character, int selected_level) {
     }
             // Handle key presses
         }
+        
+        std::string scoreText = "Score: " + std::to_string(score);
+        SDL_Surface* surface = TTF_RenderText_Solid(font, scoreText.c_str(), textColor);
+        SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
 
-        SDL_RenderClear(renderer);
+        
+        SDL_Rect scoreRect = {150, 0, surface->w, surface->h};
+
+        SDL_RenderCopy(renderer, texture, nullptr, &scoreRect);
+
+       // SDL_RenderPresent(renderer);
+
+        //SDL_RenderClear(renderer);
+        //SDL_Delay(90);
         //calling all sound effect functions here using flags so sound is played once only
         if (winsound && winsoundcount==0){
             playSoundEffectwin("winsound.wav");
@@ -155,7 +206,8 @@ void Game::runGame(char selected_character, int selected_level) {
             asteroid= new Asteroid1(renderer,"asteroid1.png",rand()%800, -100, 75, 75);       
             asteroid2->destroy();
             asteroid2= new Asteroid2(renderer, "meteor2.png", rand()%800, -100, 75, 75);
-            
+            coin->destroy();
+            coin= new Coin(renderer, "coin.png", rand()%800, -100, 75, 75);
         }
         if (crashsound && crashsoundcount<1){
             playSoundEffect("crashsound.wav");
@@ -218,6 +270,7 @@ void Game::runGame(char selected_character, int selected_level) {
                 //alien->update();
             } if (object==1){
                 alien22 = true;
+                coin1=true;
                 // alien2.draw();
                 // alien2.update();
             } if (object==2){
@@ -238,7 +291,7 @@ void Game::runGame(char selected_character, int selected_level) {
                 //playSoundEffect("lightningsound.wav");
                     if (Collision::checkCollision(lightning->objectRect, alien->objectRect)) {
                         alien11=false;
-                       
+                        
                         alien->destroy();
                         alien = new Alien (renderer, "alien.png", rand()%800, -100, 75, 75);
                 
@@ -305,7 +358,16 @@ void Game::runGame(char selected_character, int selected_level) {
                 alien->destroy();
                 alien = new Alien (renderer, "alien.png", rand()%800, -100, 75, 75);
             }
-
+        }
+        if (coin1){
+            coin->draw();
+            coin->update(selected_level);
+            if(coin->objectRect.y>=600){
+                //std::cout<<"works";
+                coin1=false;
+                coin->destroy();
+                coin = new Coin(renderer, "coin.png", rand()%800, -100, 75, 75);
+            }
         }
         if(alien22){
             alien2->draw();
@@ -350,7 +412,14 @@ void Game::runGame(char selected_character, int selected_level) {
       //collision checking
           if (selected_character=='j'){ // firstly it checks what character u have selected
           //then checks collissions if any happening , and pauses the game if collision with planet or alien asteroid 
-          
+            if (Collision::checkCollision(jet.objectRect, coin->objectRect)) {
+                coin1=false;
+                score+=1;
+                SDL_RenderCopy(renderer, texture, nullptr, &scoreRect);
+                coin->destroy();
+                coin = new Coin(renderer, "alien2.png", rand()%800, -100, 75, 75);
+            }
+
             if (Collision::checkCollision(jet.objectRect, alien->objectRect)) {
                 pause=true;
                 lost11=true;
@@ -422,6 +491,13 @@ void Game::runGame(char selected_character, int selected_level) {
             }
         
     } else if (selected_character=='r'){
+        if (Collision::checkCollision(rocket.objectRect, coin->objectRect)) {
+                coin1=false;
+                score+=1;
+                SDL_RenderCopy(renderer, texture, nullptr, &scoreRect);
+                coin->destroy();
+                coin = new Coin(renderer, "alien2.png", rand()%800, -100, 75, 75);
+            }
         if (Collision::checkCollision(rocket.objectRect, alien->objectRect)) {
                 pause=true;
                 lost11=true;
@@ -501,6 +577,13 @@ void Game::runGame(char selected_character, int selected_level) {
                 
             }
     } else if (selected_character=='s'){
+        if (Collision::checkCollision(spaceship.objectRect, coin->objectRect)) {
+                coin1=false;
+                score+=1;
+                SDL_RenderCopy(renderer, texture, nullptr, &scoreRect);
+                coin->destroy();
+                coin = new Coin(renderer, "alien2.png", rand()%800, -100, 75, 75);
+            }
         if (Collision::checkCollision(spaceship.objectRect, alien->objectRect)) {
                 pause=true;
                 lost11=true;
@@ -572,10 +655,18 @@ void Game::runGame(char selected_character, int selected_level) {
     }
     if (lost11){
         pause=true;
+        
         lost1.draw();
       
     }
        SDL_RenderPresent(renderer);
+    }
+    if (reset==1){
+
+        SDL_DestroyWindow(window);
+        Game *g=new Game;
+        g->runGame( selected_character,  selected_level);
+        delete g;
     }
     }
     //function for movement
@@ -585,8 +676,9 @@ void Game::handleKeyPress1(SDL_Rect& characterrect, const SDL_Event& event, char
     int screenWidth = 800;
     int screenHeight = 600;
     if(currentKeyStates[SDL_SCANCODE_SPACE]){
-        Game x;
-        x.runGame( selected_character,  selected_level);
+        characterrect.x = -1;
+        Game *g=new Game;
+        g->runGame( selected_character,  selected_level);
     }
     if (currentKeyStates[SDL_SCANCODE_LEFT]) {
         characterrect.x -= 10;
@@ -614,7 +706,10 @@ void Game::handleKeyPress1(SDL_Rect& characterrect, const SDL_Event& event, char
         if (characterrect.y + characterrect.h > screenHeight) {
             characterrect.y = screenHeight - characterrect.h; // Keep character within the bottom edge of the screen
         }
+   // SDL_RenderPresent(renderer);
     }
+    //TTF_CloseFont(font);
+    
 }
 
 // function for soundeffects
@@ -629,7 +724,7 @@ void Game::playSoundEffect(const char *soundFilePath)
 
     Mix_PlayChannel(-1, sound, 0);
 
-  
+    
     SDL_Delay(150);
 
     Mix_FreeChunk(sound);
